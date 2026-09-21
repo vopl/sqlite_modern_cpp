@@ -32,6 +32,8 @@ namespace sqlite {
 #if __cplusplus < 201703 || _MSVC_LANG <= 201703
 		index_binding_helper(index_binding_helper &&) = default;
 #endif
+		index_binding_helper() = default;
+		index_binding_helper(auto index, auto&& value) : index{index}, value{std::forward<decltype(value)>(value)} {}
 		typename std::conditional<Name, const char *, int>::type index;
 		T value;
 	};
@@ -39,6 +41,10 @@ namespace sqlite {
 	template<class T>
 	auto named_parameter(const char *name, T &&arg) {
 		return index_binding_helper<decltype(arg), true>{name, std::forward<decltype(arg)>(arg)};
+	}
+	template<class T>
+	auto named_parameter(const std::string& name, T &&arg) {
+		return index_binding_helper<decltype(arg), true>{name.c_str(), std::forward<decltype(arg)>(arg)};
 	}
 	template<class T>
 	auto indexed_parameter(int index, T &&arg) {
